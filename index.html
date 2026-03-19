@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>重訓筆記 V8.2 - 專業安全版</title>
+    <title>重訓筆記 V9.0 - 專業安全版</title>
+    <!-- 引入專業圖表庫 Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -37,7 +38,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: 0.5s;
         }
         .login-card {
             background: var(--card);
@@ -47,7 +47,7 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             border: 1px solid rgba(255,255,255,0.05);
             max-width: 320px;
-            width: 80%;
+            width: 85%;
         }
 
         /* 導覽列 */
@@ -101,9 +101,7 @@
         .caution-title { color: var(--danger); font-weight: 800; margin-bottom: 6px; display: block; font-size: 13px; }
         .caution-list { margin: 0; padding-left: 20px; color: #ffbaba; line-height: 1.5; font-size: 13px; list-style-type: square; }
 
-        /* 新增動作區 */
-        .add-action-area { background: rgba(255,255,255,0.02); padding: 18px; border-radius: 20px; margin-bottom: 20px; border: 1px dashed #444; }
-
+        /* 按鈕系統 */
         .btn-set { width: 100%; padding: 18px; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; cursor: pointer; background: #333; color: white; transition: 0.2s; }
         .btn-set.primary { background: var(--grad); color: black; box-shadow: 0 8px 15px rgba(0, 209, 178, 0.3); }
         .btn-set:active { transform: scale(0.96); }
@@ -118,6 +116,7 @@
 
         .btn-sync { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 18px; font-weight: 900; margin-top: 25px; box-shadow: 0 10px 20px rgba(74, 105, 189, 0.4); }
 
+        /* 推薦頁面分組 */
         .part-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
         .part-btn { flex: 0 0 auto; padding: 12px 20px; background: #2d2d2d; border-radius: 30px; border: none; color: #888; font-size: 13px; font-weight: bold; }
         .part-btn.active { background: var(--primary); color: black; }
@@ -130,34 +129,34 @@
 </head>
 <body>
 
-    <!-- 登入畫面 -->
+    <!-- 登入系統 -->
     <div id="login-overlay">
         <div class="login-card">
             <div style="font-size: 50px; margin-bottom: 10px;">⚡</div>
-            <h2 style="margin-top: 0;">教練認證系統</h2>
-            <p style="color: #666; font-size: 12px; margin-bottom: 20px;">請輸入您的重訓權限密碼</p>
+            <h2 style="margin-top: 0;">重訓認證系統</h2>
+            <p style="color: #666; font-size: 12px; margin-bottom: 20px;">請輸入您的 4 位數權限密碼</p>
             <input type="password" id="login-pwd" placeholder="輸入密碼..." style="text-align: center; border-radius: 12px;">
-            <button class="btn-set primary" onclick="checkLogin()">登入 App</button>
+            <button class="btn-set primary" onclick="checkLogin()">驗證並進入</button>
             <p id="login-err" style="color: var(--danger); font-size: 12px; margin-top: 15px; display: none;">密碼錯誤，請再試一次</p>
         </div>
     </div>
 
-    <!-- 主頁面 -->
+    <!-- 主程式區域 -->
     <div id="main-content" class="page-container">
         <div class="nav">
             <div class="nav-item active" onclick="showPage('record', this)">⚡ 紀錄</div>
             <div class="nav-item" onclick="showPage('analysis', this)">📊 分析</div>
-            <div class="nav-item" onclick="showPage('recommend', this)">🏆 教練推薦</div>
+            <div class="nav-item" onclick="showPage('recommend', this)">🏆 教學</div>
         </div>
 
-        <!-- 頁面 1: 快速紀錄 -->
+        <!-- 頁面 1: 紀錄 -->
         <div id="page-record" class="tab-content active">
-            <h2>⚡ 現時訓練紀錄</h2>
+            <h2>⚡ 訓練即時紀錄</h2>
             <div class="card">
                 <label>選擇或新增動作</label>
                 <select id="exercise" onchange="autoFill();"></select>
 
-                <div id="add-action-box" style="display:none;" class="add-action-area">
+                <div id="add-action-box" style="display:none; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 18px; margin-bottom: 20px; border: 1px dashed #444;">
                     <input type="text" id="new-action-name" placeholder="新動作名稱...">
                     <select id="new-action-cat">
                         <option value="Back">🛶 背部</option>
@@ -165,7 +164,7 @@
                         <option value="Shoulders">⚡ 肩膀</option>
                         <option value="Legs">🦵 下肢</option>
                     </select>
-                    <button class="btn-add-small" style="width:100%; background:var(--primary); color:black; font-weight:bold; border:none; padding:12px; border-radius:12px;" onclick="saveNewAction()">確認新增動作</button>
+                    <button style="width:100%; background:var(--primary); color:black; font-weight:bold; border:none; padding:12px; border-radius:12px;" onclick="saveNewAction()">確認新增</button>
                 </div>
                 <button style="background:none; color:var(--primary); border:none; font-size:12px; margin-bottom:15px; font-weight:bold; cursor:pointer;" onclick="toggleAddBox()">＋ 我要新增動作</button>
 
@@ -181,8 +180,8 @@
                     <div style="flex:1"><label>次數 (Reps)</label><input type="number" id="reps" value="12"></div>
                 </div>
 
-                <label>選擇本組完成組數 (即時儲存)</label>
-                <div class="set-buttons" style="display:flex; gap:10px;">
+                <label>完成本組組數 (即時儲存)</label>
+                <div style="display:flex; gap:10px;">
                     <button class="btn-set" style="flex:1" onclick="quickAdd(2)">2 組</button>
                     <button class="btn-set primary" style="flex:1" onclick="quickAdd(3)">3 組</button>
                     <button class="btn-set" style="flex:1" onclick="quickAdd(4)">4 組</button>
@@ -197,7 +196,7 @@
             <button id="syncBtn" class="btn-sync" onclick="syncToGoogle()">☁️ 同步至雲端 (保留 5 筆)</button>
         </div>
 
-        <!-- 頁面 2: 數據分析 -->
+        <!-- 頁面 2: 分析 -->
         <div id="page-analysis" class="tab-content">
             <h2>📊 訓練數據視覺化</h2>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
@@ -206,76 +205,80 @@
                     <span id="total-vol" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0</span>
                 </div>
                 <div style="background:#222; padding:15px; border-radius:20px; text-align:center;">
-                    <span style="font-size:10px; color:#666;">總累積組數</span>
+                    <span style="font-size:10px; color:#666;">累積總組數</span>
                     <span id="total-sets" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0</span>
                 </div>
             </div>
-            <div class="card"><label>部位分佈比例</label><canvas id="muscleChart"></canvas></div>
+            <div class="card"><label>訓練部位比例</label><canvas id="muscleChart"></canvas></div>
             <div class="card"><label>近期訓練量趨勢</label><canvas id="volumeChart"></canvas></div>
         </div>
 
-        <!-- 頁面 3: 教練推薦 -->
+        <!-- 頁面 3: 教學 -->
         <div id="page-recommend" class="tab-content">
-            <h2>🏆 教練各部位 Top 5 教學</h2>
+            <h2>🏆 教練深度教學指南</h2>
             <div class="part-filter">
-                <button class="part-btn active" onclick="setPart('Back', this)">🛶 背部</button>
-                <button class="part-btn" onclick="setPart('Chest', this)">🛡️ 胸部</button>
-                <button class="part-btn" onclick="setPart('Shoulders', this)">⚡ 肩膀</button>
-                <button class="part-btn" onclick="setPart('Legs', this)">🦵 下肢</button>
+                <button class="part-btn active" onclick="setPart('Back', this)">🛶 背部精雕</button>
+                <button class="part-btn" onclick="setPart('Chest', this)">🛡️ 胸部訓練</button>
+                <button class="part-btn" onclick="setPart('Shoulders', this)">⚡ 肩膀手臂</button>
+                <button class="part-btn" onclick="setPart('Legs', this)">🦵 下肢王者</button>
             </div>
             <div id="recommend-view"></div>
         </div>
     </div>
 
     <script>
-        const gasUrl = "https://script.google.com/macros/s/AKfycbxaa47ByIcC5P9chIZd1h7QnJPtH9F0eR8XEFBiZsY4_uPosQAQ5SxU25_nF84imaSmxg/exec";
-        const DATA_KEY = 'gym_v8_2_data';
-        const ACTION_KEY = 'gym_v8_2_actions';
-        const APP_PWD = "8888"; // <--- 這裡可以改您的登入密碼
+        // --- 已填入您提供的專屬 GAS 網址 ---
+        const gasUrl = "https://script.google.com/macros/s/AKfycbzV8pR-omK1H3HyktdOPnAZ_FmKWOHzs3ZTqE07Nw01KaYqQ0AK-LYZLuhhHVbthNmy-A/exec";
+        
+        const DATA_KEY = 'gym_v9_0_data';
+        const ACTION_KEY = 'gym_v9_0_actions';
+        const APP_PWD = "8888"; 
 
-        const defaultWeights = { "腿推 (Leg Press)": 0, "臀推 (Hip Thrust)": 0, "內夾腿 (Adduction)": 25, "外推腿 (Abduction)": 25, "腿後勾 (Leg Curl)": 25, "腿前勾 (Leg Extension)": 18 };
+        const defaultWeights = { 
+            "腿推 (Leg Press)": 0, "臀推 (Hip Thrust)": 0, "內夾腿 (Adduction)": 25, 
+            "腿外推 (Abduction)": 25, "腿後勾 (Leg Curl)": 25, "腿前勾 (Leg Extension)": 18,
+            "保加利亞蹲": 0
+        };
 
-        // 智慧教練語錄
-        const coachWisdom = {
-            "胸推": { points: ["握柄對齊乳頭連線(胸中線)","肩胛後收下壓，貼死靠墊","手肘與軀幹呈 60 度，不平張","頂端關節不鎖死維持張力"], cautions: ["手肘嚴禁高過肩膀(防止肩剪力)","嚴禁拱腰挺胸代償"] },
-            "滑輪下拉": { points: ["握距 1.5 倍肩寬","肩膀下沉並稍微向外旋轉(挺胸)","手肘引導向口袋方向下拉至上胸","回放感受背肌徹底拉長"], cautions: ["嚴禁聳肩借力","嚴禁利用身體後倒慣性"] },
-            "划船": { points: ["背部平行地面或微斜","手肘貼緊軀幹後拉過腰","夾緊肩胛骨停留一秒"], cautions: ["嚴禁圓背傷腰"] },
-            "飛鳥": { points: ["雙臂呈圓弧狀抱大樹","中間強力擠壓胸肌","緩慢打開延展"], cautions: ["手肘角度固定不可變"] },
-            "腿推": { points: ["腳掌踩滿踏板中心","下放膝蓋 90 度，背臀貼死","頂端膝蓋微彎，嚴禁鎖死"], cautions: ["屁股離墊會重傷腰椎"] },
-            "臀推": { points: ["槓置於髖部皺褶，腳跟踩實","頂端擠壓臀部 1 秒","下巴收緊保護頸椎"], cautions: ["嚴禁墊腳尖","嚴禁過度拱腰"] },
-            "肩上推": { points: ["背部緊靠，垂直推向天頂","下放至手肘略低於肩膀即可"], cautions: ["核心絕對收緊，嚴禁拱背"] },
-            "側平舉": { points: ["手肘微彎抬至肩高","小指微朝上(提水壺倒水)","下沉肩膀，放鬆斜方肌"], cautions: ["嚴禁聳肩借力提重量"] }
+        const coachDictionary = {
+            "胸推": { points: ["握柄精準對齊「乳頭連線(胸中線)」","肩胛骨後收下壓，穩定貼死靠墊","手肘與軀幹呈約 60 度，不要平張","推起吐氣，頂端手肘不鎖死維持張力"], cautions: ["手肘絕對嚴禁高過肩膀(防止肩關節剪力)","嚴禁拱腰挺胸代償發力"] },
+            "滑輪下拉": { points: ["握距：建議雙手略寬於肩膀","啟動：肩膀先下沉並稍微「向外旋轉」(挺胸感)","路徑：手肘引導向側腹口袋方向下拉至上胸","緩慢回放感受到背肌被徹底拉長"], cautions: ["嚴禁聳肩拉重量(斜方肌代償)","嚴禁利用身體後倒慣性擺盪"] },
+            "划船": { points: ["背部保持平直或微斜","手肘貼緊軀幹後拉過腰際","夾緊肩胛骨停留瞬間 1 秒"], cautions: ["嚴禁圓背拉大重量","軀幹嚴禁大幅前後晃動"] },
+            "飛鳥": { points: ["雙臂呈圓弧狀抱大樹，固定肘角","中間強力擠壓胸肌邊緣","緩慢打開感受延展"], cautions: ["動作不可變成推舉","手肘角度固定不可變"] },
+            "腿推": { points: ["腳掌踩滿踏板中心(不墊腳尖)","下放膝蓋至 90 度，背臀必須貼死墊子","推起至頂端膝蓋微彎，嚴禁鎖死"], cautions: ["屁股離開座墊重傷腰椎"] },
+            "臀推": { points: ["槓置於髖部，腳跟踩實發力","頂端強力擠壓臀部 1 秒，下巴微收","視線看正前方保護頸椎"], cautions: ["嚴禁墊腳尖","嚴禁過度拱腰代償"] },
+            "外推": { points: ["身體可微前傾增加臀中肌感受","發力將兩腿向外推開，頂端稍停","回放時緩慢維持張力"], cautions: ["不要利用腰部擺盪借力"] },
+            "保加利亞蹲": { points: ["重心在前腳足中，後腳勾住長凳","垂直下蹲至前大腿與地面平行","軀幹微前傾增加臀部參與度"], cautions: ["前膝穩定不要內扣晃動","重心不要全壓在後腳腳趾上"] },
+            "腿後勾": { points: ["骨盆平貼墊子","發力將小腿勾向臀部","緩慢回放感受大腿後側拉長"], cautions: ["核心沒收緊會導致腰部痠痛"] },
+            "腿前勾": { points: ["膝蓋對準機器轉軸，腳踝勾住踏板","向上踢直並停留一秒，慢速放下"], cautions: ["嚴禁利用甩動發力"] },
+            "肩上推": { points: ["背部緊靠，垂直推向天頂","下放至手肘略低於肩膀即可","核心收緊不拱背"], cautions: ["嚴禁挺起胸口變斜推"] },
+            "側平舉": { points: ["手肘微彎抬至肩高","想像手提水壺倒水，小指微朝上","肩膀下沉，放鬆斜方肌"], cautions: ["嚴禁聳肩借力提重量"] }
         };
 
         const genericRules = {
-            "Back": { points: ["沉肩啟動","肘發力，手僅是勾子","延展背闊肌"], cautions: ["嚴禁聳肩代償"] },
-            "Chest": { points: ["肩胛穩定","手肘微收","控制離心收縮"], cautions: ["不要鎖死關節"] },
-            "Legs": { points: ["核心絕對收緊","腳跟踩實","呼吸不憋氣"], cautions: ["膝蓋嚴禁鎖死"] },
-            "Shoulders": { points: ["核心支撐腰部","動作緩慢受控"], cautions: ["脖子與斜方肌放鬆"] }
+            "Back": { points: ["沉肩啟動：啟動前先下沉肩胛骨","手僅是勾子，用手肘帶動重量","回放時徹底拉長肌肉"], cautions: ["嚴禁聳肩代償"] },
+            "Chest": { points: ["肩胛穩定：後收下壓穩定靠墊","手肘微收：與軀幹保持夾角","發力吐氣：關節不鎖死"], cautions: ["不要鎖死關節"] },
+            "Legs": { points: ["重心腳跟：腳跟或足中踩實","核心絕對收緊：保護腰椎中立","不鎖死：頂端膝蓋微彎"], cautions: ["膝蓋嚴禁完全打直"] },
+            "Shoulders": { points: ["核心支撐腰部","動作緩慢受控","肩膀下沉啟動"], cautions: ["脖子與斜方肌放鬆"] }
         };
 
         let currentPart = 'Back';
         let muscleChart = null; let volumeChart = null;
 
         const defaultActions = [
-            {n:"腿推 (Leg Press)", c:"Legs"}, {n:"臀推 (Hip Thrust)", c:"Legs"}, {n:"內夾腿 (Adduction)", c:"Legs"}, {n:"腿後勾 (Leg Curl)", c:"Legs"}, {n:"腿前勾 (Leg Extension)", c:"Legs"},
+            {n:"腿推 (Leg Press)", c:"Legs"}, {n:"臀推 (Hip Thrust)", c:"Legs"}, {n:"內夾腿 (Adduction)", c:"Legs"}, {n:"腿外推 (Abduction)", c:"Legs"}, {n:"腿後勾 (Leg Curl)", c:"Legs"}, {n:"腿前勾 (Leg Extension)", c:"Legs"}, {n:"保加利亞蹲", c:"Legs"},
             {n:"滑輪下拉 (Lat Pulldown)", c:"Back"}, {n:"坐式划船 (Seated Row)", c:"Back"}, {n:"W桿對握下拉", c:"Back"}, {n:"反向飛鳥 (Reverse Fly)", c:"Back"},
             {n:"胸推 (Chest Press)", c:"Chest"}, {n:"夾胸飛鳥 (Pec Fly)", c:"Chest"}, {n:"啞鈴臥推", c:"Chest"},
             {n:"肩上推 (Shoulder Press)", c:"Shoulders"}, {n:"側平舉 (Lateral Raise)", c:"Shoulders"}, {n:"阿諾推舉", c:"Shoulders"}
         ];
 
         function checkLogin() {
-            const pwd = document.getElementById('login-pwd').value;
-            if(pwd === APP_PWD) {
-                document.getElementById('login-overlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'block';
-                    initSelect();
-                }, 500);
+            if(document.getElementById('login-pwd').value === APP_PWD) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                initSelect();
             } else {
                 document.getElementById('login-err').style.display = 'block';
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
             }
         }
 
@@ -302,7 +305,7 @@
             custom.push({n: name, c: cat});
             localStorage.setItem(ACTION_KEY, JSON.stringify(custom));
             document.getElementById('new-action-name').value = "";
-            toggleAddBox(); initSelect();
+            toggleAddBox(); initSelect(); alert("✅ 動作已新增！");
         }
 
         function autoFill() {
@@ -319,7 +322,7 @@
         }
 
         function getGuide(name, cat) {
-            for(let key in coachWisdom) { if(name.includes(key)) return coachWisdom[key]; }
+            for(let key in coachDictionary) { if(name.includes(key)) return coachDictionary[key]; }
             return genericRules[cat] || { points: ["核心收緊"], cautions: ["注意安全"] };
         }
 
@@ -329,14 +332,18 @@
             const type = ex.value;
             const wt = parseFloat(document.getElementById('weight').value);
             const rp = parseInt(document.getElementById('reps').value);
-            const now = new Date();
             let data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
             for(let i=1; i<=sets; i++) {
-                data.unshift({ id: Date.now()+i, name, type, wt, rp, date: `${now.getMonth()+1}/${now.getDate()}`, time: `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`, setIdx: i });
+                const now = new Date();
+                data.unshift({ 
+                    id: Date.now()+i, name, type, wt, rp, 
+                    date: `${now.getMonth()+1}/${now.getDate()}`, 
+                    time: now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}), 
+                    setIdx: i 
+                });
             }
             localStorage.setItem(DATA_KEY, JSON.stringify(data));
             renderHistory();
-            if (navigator.vibrate) navigator.vibrate(50);
         }
 
         function renderHistory() {
@@ -347,7 +354,7 @@
                     <div><b>${i.name} (組${i.setIdx})</b><span>${i.date} ${i.time}</span></div>
                     <div class="history-val">${i.wt}kg x ${i.rp}</div>
                     <div class="del-btn" onclick="deleteItem(${i.id})">✕</div>
-                </div>`).join('') || '<p style="text-align:center;color:#444;">無暫存紀錄</p>';
+                </div>`).join('') || '<p style="text-align:center;color:#444;">無紀錄</p>';
         }
 
         function deleteItem(id) {
@@ -389,7 +396,7 @@
             document.getElementById('total-vol').innerText = data.reduce((s,i)=>s+(i.wt*i.rp),0).toLocaleString();
             document.getElementById('total-sets').innerText = data.length;
             const mus = { Back:0, Chest:0, Legs:0, Shoulders:0 };
-            data.forEach(i => mus[i.type]++);
+            data.forEach(i => { if(mus[i.type] !== undefined) mus[i.type]++; });
             if(muscleChart) muscleChart.destroy();
             muscleChart = new Chart(document.getElementById('muscleChart'), { type:'doughnut', data:{ labels:['背部','胸部','下肢','肩膀'], datasets:[{ data:Object.values(mus), backgroundColor:['#00d1b2','#4a69bd','#ffdd57','#ff4757'], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:'bottom', labels:{color:'#fff'} } } } });
             const dai = {}; data.slice().reverse().forEach(i => dai[i.date] = (dai[i.date]||0)+(i.wt*i.rp));
@@ -399,17 +406,17 @@
 
         async function syncToGoogle() {
             const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
-            if (!data.length) return alert("無資料同步");
+            if (!data.length) return alert("暫無資料需要同步");
             const btn = document.getElementById('syncBtn'); btn.disabled = true;
             try {
                 for (let i = 0; i < data.length; i++) {
                     btn.innerText = `⏳ 同步中 (${i+1}/${data.length})...`;
                     await fetch(gasUrl, { method: "POST", mode: "no-cors", body: JSON.stringify(data[i]) });
                 }
-                alert("🎉 同步成功！已存入雲端試算表。");
+                alert("🎉 同步成功！資料已存入雲端試算表。");
                 if (data.length > 5) localStorage.setItem(DATA_KEY, JSON.stringify(data.slice(0, 5)));
                 renderHistory();
-            } catch (e) { alert("同步失敗，請檢查網路"); } finally { btn.innerText = "☁️ 同步至雲端 (保留最近 5 筆)"; btn.disabled = false; }
+            } catch (e) { alert("同步失敗，請檢查網路連線或 GAS 權限設定"); } finally { btn.innerText = "☁️ 同步至雲端 (保留 5 筆)"; btn.disabled = false; }
         }
 
         window.onload = renderHistory;
