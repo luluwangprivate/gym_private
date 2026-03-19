@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>重訓筆記 V8.2 - 專業安全版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #00d1b2;
+            --dark: #0f0f0f;
+            --card: #1a1a1a;
+            --input-bg: #262626;
+            --text: #ffffff;
+            --accent: #4a69bd;
+            --highlight: #ffdd57;
+            --danger: #ff4757;
+            --grad: linear-gradient(135deg, #00d1b2 0%, #00b89c 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* 登入遮罩 */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--dark);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.5s;
+        }
+        .login-card {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 320px;
+            width: 80%;
+        }
+
+        /* 導覽列 */
+        .nav {
+            display: flex;
+            background: rgba(26, 26, 26, 0.95);
+            position: sticky;
+            top: 0; z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+        .nav-item {
+            flex: 1; text-align: center; padding: 18px 0;
+            font-size: 14px; color: #777; cursor: pointer;
+            transition: 0.3s; font-weight: 700;
+        }
+        .nav-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+
+        .page-container { padding: 16px; max-width: 600px; margin: 0 auto; display: none; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: var(--primary); text-align: center; margin: 15px 0 25px 0; font-size: 24px; font-weight: 800; }
+
+        .card {
+            background: var(--card);
+            padding: 22px;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        label { display: block; color: #777; font-size: 11px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
+
+        select, input {
+            width: 100%; padding: 15px; margin-bottom: 15px;
+            border-radius: 16px; border: 1px solid transparent;
+            background: var(--input-bg); color: white; font-size: 16px;
+        }
+        select:focus, input:focus { border-color: var(--primary); outline: none; background: #2f2f2f; }
+
+        /* 教學看板 */
+        .quick-tip-card {
+            background: linear-gradient(160deg, rgba(0, 209, 178, 0.12) 0%, rgba(15, 15, 15, 0.4) 100%);
+            border-radius: 20px; padding: 18px; margin-bottom: 24px; border-left: 6px solid var(--primary);
+        }
+        .tip-title { color: var(--primary); font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .tip-list { margin: 0 0 12px 0; padding-left: 20px; color: #efefef; line-height: 1.7; font-size: 13.5px; }
+        .caution-title { color: var(--danger); font-weight: 800; margin-bottom: 6px; display: block; font-size: 13px; }
+        .caution-list { margin: 0; padding-left: 20px; color: #ffbaba; line-height: 1.5; font-size: 13px; list-style-type: square; }
+
+        /* 新增動作區 */
+        .add-action-area { background: rgba(255,255,255,0.02); padding: 18px; border-radius: 20px; margin-bottom: 20px; border: 1px dashed #444; }
+
+        .btn-set { width: 100%; padding: 18px; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; cursor: pointer; background: #333; color: white; transition: 0.2s; }
+        .btn-set.primary { background: var(--grad); color: black; box-shadow: 0 8px 15px rgba(0, 209, 178, 0.3); }
+        .btn-set:active { transform: scale(0.96); }
+
+        .history-card {
+            background: var(--card); padding: 18px; border-radius: 20px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 5px solid var(--primary); position: relative;
+        }
+        .history-val { color: var(--primary); font-weight: 800; font-size: 19px; margin-right: 35px; }
+        .del-btn { position: absolute; right: 15px; color: #444; font-size: 20px; cursor: pointer; }
+
+        .btn-sync { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 18px; font-weight: 900; margin-top: 25px; box-shadow: 0 10px 20px rgba(74, 105, 189, 0.4); }
+
+        .part-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+        .part-btn { flex: 0 0 auto; padding: 12px 20px; background: #2d2d2d; border-radius: 30px; border: none; color: #888; font-size: 13px; font-weight: bold; }
+        .part-btn.active { background: var(--primary); color: black; }
+
+        .rec-item { background: var(--card); border-radius: 24px; margin-bottom: 25px; border: 1px solid #333; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .rec-head { background: #252525; padding: 18px; border-bottom: 1px solid #333; }
+        .rec-label { color: var(--highlight); font-size: 12px; font-weight: 800; display: block; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 4px; }
+        .rec-list { margin: 0 0 18px 0; padding-left: 20px; color: #ddd; line-height: 1.8; font-size: 14.5px; }
+    </style>
+</head>
+<body>
+
+    <!-- 登入畫面 -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <div style="font-size: 50px; margin-bottom: 10px;">⚡</div>
+            <h2 style="margin-top: 0;">教練認證系統</h2>
+            <p style="color: #666; font-size: 12px; margin-bottom: 20px;">請輸入您的重訓權限密碼</p>
+            <input type="password" id="login-pwd" placeholder="輸入密碼..." style="text-align: center; border-radius: 12px;">
+            <button class="btn-set primary" onclick="checkLogin()">登入 App</button>
+            <p id="login-err" style="color: var(--danger); font-size: 12px; margin-top: 15px; display: none;">密碼錯誤，請再試一次</p>
+        </div>
+    </div>
+
+    <!-- 主頁面 -->
+    <div id="main-content" class="page-container">
+        <div class="nav">
+            <div class="nav-item active" onclick="showPage('record', this)">⚡ 紀錄</div>
+            <div class="nav-item" onclick="showPage('analysis', this)">📊 分析</div>
+            <div class="nav-item" onclick="showPage('recommend', this)">🏆 教練推薦</div>
+        </div>
+
+        <!-- 頁面 1: 快速紀錄 -->
+        <div id="page-record" class="tab-content active">
+            <h2>⚡ 現時訓練紀錄</h2>
+            <div class="card">
+                <label>選擇或新增動作</label>
+                <select id="exercise" onchange="autoFill();"></select>
+
+                <div id="add-action-box" style="display:none;" class="add-action-area">
+                    <input type="text" id="new-action-name" placeholder="新動作名稱...">
+                    <select id="new-action-cat">
+                        <option value="Back">🛶 背部</option>
+                        <option value="Chest">🛡️ 胸部</option>
+                        <option value="Shoulders">⚡ 肩膀</option>
+                        <option value="Legs">🦵 下肢</option>
+                    </select>
+                    <button class="btn-add-small" style="width:100%; background:var(--primary); color:black; font-weight:bold; border:none; padding:12px; border-radius:12px;" onclick="saveNewAction()">確認新增動作</button>
+                </div>
+                <button style="background:none; color:var(--primary); border:none; font-size:12px; margin-bottom:15px; font-weight:bold; cursor:pointer;" onclick="toggleAddBox()">＋ 我要新增動作</button>
+
+                <div id="quick-tip-box" class="quick-tip-card">
+                    <span class="tip-title">⚡ 教練核心指令</span>
+                    <ul id="quick-points" class="tip-list"></ul>
+                    <span class="caution-title">🛑 嚴重警告錯誤</span>
+                    <ul id="quick-cautions" class="caution-list"></ul>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex:1"><label>重量 (kg)</label><input type="number" id="weight" value="0" step="0.5"></div>
+                    <div style="flex:1"><label>次數 (Reps)</label><input type="number" id="reps" value="12"></div>
+                </div>
+
+                <label>選擇本組完成組數 (即時儲存)</label>
+                <div class="set-buttons" style="display:flex; gap:10px;">
+                    <button class="btn-set" style="flex:1" onclick="quickAdd(2)">2 組</button>
+                    <button class="btn-set primary" style="flex:1" onclick="quickAdd(3)">3 組</button>
+                    <button class="btn-set" style="flex:1" onclick="quickAdd(4)">4 組</button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin:20px 5px 10px; color:#888; font-size:12px; font-weight:bold;">
+                <span>📍 本次暫存清單</span>
+                <span id="record-count" style="color:var(--primary);">0 筆</span>
+            </div>
+            <div id="history-list"></div>
+            <button id="syncBtn" class="btn-sync" onclick="syncToGoogle()">☁️ 同步至雲端 (保留 5 筆)</button>
+        </div>
+
+        <!-- 頁面 2: 數據分析 -->
+        <div id="page-analysis" class="tab-content">
+            <h2>📊 訓練數據視覺化</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+                <div style="background:#222; padding:15px; border-radius:20px; text-align:center;">
+                    <span style="font-size:10px; color:#666;">總訓練體積</span>
+                    <span id="total-vol" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0</span>
+                </div>
+                <div style="background:#222; padding:15px; border-radius:20px; text-align:center;">
+                    <span style="font-size:10px; color:#666;">總累積組數</span>
+                    <span id="total-sets" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0</span>
+                </div>
+            </div>
+            <div class="card"><label>部位分佈比例</label><canvas id="muscleChart"></canvas></div>
+            <div class="card"><label>近期訓練量趨勢</label><canvas id="volumeChart"></canvas></div>
+        </div>
+
+        <!-- 頁面 3: 教練推薦 -->
+        <div id="page-recommend" class="tab-content">
+            <h2>🏆 教練各部位 Top 5 教學</h2>
+            <div class="part-filter">
+                <button class="part-btn active" onclick="setPart('Back', this)">🛶 背部</button>
+                <button class="part-btn" onclick="setPart('Chest', this)">🛡️ 胸部</button>
+                <button class="part-btn" onclick="setPart('Shoulders', this)">⚡ 肩膀</button>
+                <button class="part-btn" onclick="setPart('Legs', this)">🦵 下肢</button>
+            </div>
+            <div id="recommend-view"></div>
+        </div>
+    </div>
+
+    <script>
+        const gasUrl = "https://script.google.com/macros/s/AKfycbxaa47ByIcC5P9chIZd1h7QnJPtH9F0eR8XEFBiZsY4_uPosQAQ5SxU25_nF84imaSmxg/exec";
+        const DATA_KEY = 'gym_v8_2_data';
+        const ACTION_KEY = 'gym_v8_2_actions';
+        const APP_PWD = "8888"; // <--- 這裡可以改您的登入密碼
+
+        const defaultWeights = { "腿推 (Leg Press)": 0, "臀推 (Hip Thrust)": 0, "內夾腿 (Adduction)": 25, "外推腿 (Abduction)": 25, "腿後勾 (Leg Curl)": 25, "腿前勾 (Leg Extension)": 18 };
+
+        // 智慧教練語錄
+        const coachWisdom = {
+            "胸推": { points: ["握柄對齊乳頭連線(胸中線)","肩胛後收下壓，貼死靠墊","手肘與軀幹呈 60 度，不平張","頂端關節不鎖死維持張力"], cautions: ["手肘嚴禁高過肩膀(防止肩剪力)","嚴禁拱腰挺胸代償"] },
+            "滑輪下拉": { points: ["握距 1.5 倍肩寬","肩膀下沉並稍微向外旋轉(挺胸)","手肘引導向口袋方向下拉至上胸","回放感受背肌徹底拉長"], cautions: ["嚴禁聳肩借力","嚴禁利用身體後倒慣性"] },
+            "划船": { points: ["背部平行地面或微斜","手肘貼緊軀幹後拉過腰","夾緊肩胛骨停留一秒"], cautions: ["嚴禁圓背傷腰"] },
+            "飛鳥": { points: ["雙臂呈圓弧狀抱大樹","中間強力擠壓胸肌","緩慢打開延展"], cautions: ["手肘角度固定不可變"] },
+            "腿推": { points: ["腳掌踩滿踏板中心","下放膝蓋 90 度，背臀貼死","頂端膝蓋微彎，嚴禁鎖死"], cautions: ["屁股離墊會重傷腰椎"] },
+            "臀推": { points: ["槓置於髖部皺褶，腳跟踩實","頂端擠壓臀部 1 秒","下巴收緊保護頸椎"], cautions: ["嚴禁墊腳尖","嚴禁過度拱腰"] },
+            "肩上推": { points: ["背部緊靠，垂直推向天頂","下放至手肘略低於肩膀即可"], cautions: ["核心絕對收緊，嚴禁拱背"] },
+            "側平舉": { points: ["手肘微彎抬至肩高","小指微朝上(提水壺倒水)","下沉肩膀，放鬆斜方肌"], cautions: ["嚴禁聳肩借力提重量"] }
+        };
+
+        const genericRules = {
+            "Back": { points: ["沉肩啟動","肘發力，手僅是勾子","延展背闊肌"], cautions: ["嚴禁聳肩代償"] },
+            "Chest": { points: ["肩胛穩定","手肘微收","控制離心收縮"], cautions: ["不要鎖死關節"] },
+            "Legs": { points: ["核心絕對收緊","腳跟踩實","呼吸不憋氣"], cautions: ["膝蓋嚴禁鎖死"] },
+            "Shoulders": { points: ["核心支撐腰部","動作緩慢受控"], cautions: ["脖子與斜方肌放鬆"] }
+        };
+
+        let currentPart = 'Back';
+        let muscleChart = null; let volumeChart = null;
+
+        const defaultActions = [
+            {n:"腿推 (Leg Press)", c:"Legs"}, {n:"臀推 (Hip Thrust)", c:"Legs"}, {n:"內夾腿 (Adduction)", c:"Legs"}, {n:"腿後勾 (Leg Curl)", c:"Legs"}, {n:"腿前勾 (Leg Extension)", c:"Legs"},
+            {n:"滑輪下拉 (Lat Pulldown)", c:"Back"}, {n:"坐式划船 (Seated Row)", c:"Back"}, {n:"W桿對握下拉", c:"Back"}, {n:"反向飛鳥 (Reverse Fly)", c:"Back"},
+            {n:"胸推 (Chest Press)", c:"Chest"}, {n:"夾胸飛鳥 (Pec Fly)", c:"Chest"}, {n:"啞鈴臥推", c:"Chest"},
+            {n:"肩上推 (Shoulder Press)", c:"Shoulders"}, {n:"側平舉 (Lateral Raise)", c:"Shoulders"}, {n:"阿諾推舉", c:"Shoulders"}
+        ];
+
+        function checkLogin() {
+            const pwd = document.getElementById('login-pwd').value;
+            if(pwd === APP_PWD) {
+                document.getElementById('login-overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    initSelect();
+                }, 500);
+            } else {
+                document.getElementById('login-err').style.display = 'block';
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }
+        }
+
+        function initSelect() {
+            const custom = JSON.parse(localStorage.getItem(ACTION_KEY)) || [];
+            const all = [...defaultActions, ...custom];
+            const groups = { Legs:"🦵 下肢", Back:"🛶 背部", Chest:"🛡️ 胸部", Shoulders:"⚡ 肩膀" };
+            let html = "";
+            for(let key in groups) {
+                html += `<optgroup label="${groups[key]}">`;
+                all.filter(a => a.c === key).forEach(a => html += `<option value="${a.c}">${a.n}</option>`);
+                html += `</optgroup>`;
+            }
+            document.getElementById('exercise').innerHTML = html;
+            autoFill();
+        }
+
+        function toggleAddBox() { const b = document.getElementById('add-action-box'); b.style.display = b.style.display==='none'?'block':'none'; }
+        function saveNewAction() {
+            const name = document.getElementById('new-action-name').value;
+            const cat = document.getElementById('new-action-cat').value;
+            if(!name) return;
+            let custom = JSON.parse(localStorage.getItem(ACTION_KEY)) || [];
+            custom.push({n: name, c: cat});
+            localStorage.setItem(ACTION_KEY, JSON.stringify(custom));
+            document.getElementById('new-action-name').value = "";
+            toggleAddBox(); initSelect();
+        }
+
+        function autoFill() {
+            const ex = document.getElementById('exercise');
+            const name = ex.options[ex.selectedIndex].text;
+            const cat = ex.value;
+            const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            const last = data.find(i => i.name === name);
+            document.getElementById('weight').value = last ? last.wt : (defaultWeights[name] || 0);
+            document.getElementById('reps').value = last ? last.rp : 12;
+            const matched = getGuide(name, cat);
+            document.getElementById('quick-points').innerHTML = matched.points.map(p => `<li>${p}</li>`).join('');
+            document.getElementById('quick-cautions').innerHTML = matched.cautions.map(c => `<li>${c}</li>`).join('');
+        }
+
+        function getGuide(name, cat) {
+            for(let key in coachWisdom) { if(name.includes(key)) return coachWisdom[key]; }
+            return genericRules[cat] || { points: ["核心收緊"], cautions: ["注意安全"] };
+        }
+
+        function quickAdd(sets) {
+            const ex = document.getElementById('exercise');
+            const name = ex.options[ex.selectedIndex].text;
+            const type = ex.value;
+            const wt = parseFloat(document.getElementById('weight').value);
+            const rp = parseInt(document.getElementById('reps').value);
+            const now = new Date();
+            let data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            for(let i=1; i<=sets; i++) {
+                data.unshift({ id: Date.now()+i, name, type, wt, rp, date: `${now.getMonth()+1}/${now.getDate()}`, time: `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`, setIdx: i });
+            }
+            localStorage.setItem(DATA_KEY, JSON.stringify(data));
+            renderHistory();
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function renderHistory() {
+            const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            document.getElementById('record-count').innerText = `${data.length} 筆`;
+            document.getElementById('history-list').innerHTML = data.map(i => `
+                <div class="history-card">
+                    <div><b>${i.name} (組${i.setIdx})</b><span>${i.date} ${i.time}</span></div>
+                    <div class="history-val">${i.wt}kg x ${i.rp}</div>
+                    <div class="del-btn" onclick="deleteItem(${i.id})">✕</div>
+                </div>`).join('') || '<p style="text-align:center;color:#444;">無暫存紀錄</p>';
+        }
+
+        function deleteItem(id) {
+            let data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            localStorage.setItem(DATA_KEY, JSON.stringify(data.filter(i => i.id !== id)));
+            renderHistory();
+        }
+
+        function showPage(pId, navEl) {
+            document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + pId).classList.add('active');
+            navEl.classList.add('active');
+            if (pId === 'analysis') renderAnalysis();
+            if (pId === 'recommend') renderRecommend();
+            window.scrollTo(0, 0);
+        }
+
+        function setPart(p, btn) { currentPart = p; document.querySelectorAll('.part-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderRecommend(); }
+
+        function renderRecommend() {
+            const custom = JSON.parse(localStorage.getItem(ACTION_KEY)) || [];
+            const all = [...defaultActions, ...custom].filter(a => a.c === currentPart);
+            document.getElementById('recommend-view').innerHTML = all.map(i => {
+                const guide = getGuide(i.n, i.c);
+                return `<div class="rec-item">
+                    <div class="rec-head"><b class="rec-title">${i.n}</b></div>
+                    <div class="rec-body">
+                        <span class="rec-label">⚡ 教練核心指令</span><ul class="rec-list">${guide.points.map(p => `<li>${p}</li>`).join('')}</ul>
+                        <span class="rec-label" style="color:var(--danger)">🛑 嚴重警告錯誤</span><ul class="rec-list" style="color:#ffbaba;">${guide.cautions.map(c => `<li>${c}</li>`).join('')}</ul>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderAnalysis() {
+            const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            if(!data.length) return;
+            document.getElementById('total-vol').innerText = data.reduce((s,i)=>s+(i.wt*i.rp),0).toLocaleString();
+            document.getElementById('total-sets').innerText = data.length;
+            const mus = { Back:0, Chest:0, Legs:0, Shoulders:0 };
+            data.forEach(i => mus[i.type]++);
+            if(muscleChart) muscleChart.destroy();
+            muscleChart = new Chart(document.getElementById('muscleChart'), { type:'doughnut', data:{ labels:['背部','胸部','下肢','肩膀'], datasets:[{ data:Object.values(mus), backgroundColor:['#00d1b2','#4a69bd','#ffdd57','#ff4757'], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:'bottom', labels:{color:'#fff'} } } } });
+            const dai = {}; data.slice().reverse().forEach(i => dai[i.date] = (dai[i.date]||0)+(i.wt*i.rp));
+            if(volumeChart) volumeChart.destroy();
+            volumeChart = new Chart(document.getElementById('volumeChart'), { type:'bar', data:{ labels:Object.keys(dai), datasets:[{ label:'量(kg)', data:Object.values(dai), backgroundColor:'rgba(0, 209, 178, 0.6)', borderRadius:8 }] }, options:{ scales:{ y:{ grid:{color:'#333'}, ticks:{color:'#888'} }, x:{ ticks:{color:'#888'} } }, plugins:{ legend:{display:false} } } });
+        }
+
+        async function syncToGoogle() {
+            const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            if (!data.length) return alert("無資料同步");
+            const btn = document.getElementById('syncBtn'); btn.disabled = true;
+            try {
+                for (let i = 0; i < data.length; i++) {
+                    btn.innerText = `⏳ 同步中 (${i+1}/${data.length})...`;
+                    await fetch(gasUrl, { method: "POST", mode: "no-cors", body: JSON.stringify(data[i]) });
+                }
+                alert("🎉 同步成功！已存入雲端試算表。");
+                if (data.length > 5) localStorage.setItem(DATA_KEY, JSON.stringify(data.slice(0, 5)));
+                renderHistory();
+            } catch (e) { alert("同步失敗，請檢查網路"); } finally { btn.innerText = "☁️ 同步至雲端 (保留最近 5 筆)"; btn.disabled = false; }
+        }
+
+        window.onload = renderHistory;
+    </script>
+</body>
+</html>
