@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>重訓筆記 V11.0 - 專業安全版</title>
-    <!-- 引入專業 Chart.js 圖表 -->
+    <title>重訓進度筆記 V27.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
         :root {
             --primary: #00d1b2;
-            --dark: #0f0f0f;
-            --card: #1a1a1a;
-            --input-bg: #262626;
+            --primary-soft: rgba(0, 209, 178, 0.1);
+            --dark: #0a0a0a;
+            --card: #141414;
+            --input-bg: #1c1c1c;
             --text: #ffffff;
-            --accent: #4a69bd;
+            --text-dim: #666666;
             --highlight: #ffdd57;
-            --danger: #ff4757;
-            --grad: linear-gradient(135deg, #00d1b2 0%, #00b89c 100%);
+            --grad: linear-gradient(135deg, #00d1b2 0%, #00a896 100%);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background: var(--dark);
             color: var(--text);
             margin: 0;
@@ -28,7 +29,7 @@
             overflow-x: hidden;
         }
 
-        /* 驗證遮罩層 */
+        /* 驗證遮罩 */
         #login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -41,248 +42,264 @@
         }
         .login-card {
             background: var(--card);
-            padding: 40px;
-            border-radius: 30px;
+            padding: 50px 40px;
+            border-radius: 40px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
-            max-width: 320px;
-            width: 85%;
+            border: 1px solid #222;
+            width: 85%; max-width: 360px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
 
         /* 導覽列 */
         .nav {
             display: flex;
-            background: rgba(26, 26, 26, 0.95);
+            background: rgba(10, 10, 10, 0.98);
             position: sticky;
             top: 0; z-index: 1000;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #1a1a1a;
         }
         .nav-item {
-            flex: 1; text-align: center; padding: 18px 0;
-            font-size: 14px; color: #777; cursor: pointer;
-            transition: 0.3s; font-weight: 700;
+            flex: 1; text-align: center; padding: 22px 0;
+            font-size: 11px; color: #444; cursor: pointer;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+            transition: 0.3s;
         }
-        .nav-item.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        .nav-item.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
-        .page-container { padding: 16px; max-width: 600px; margin: 0 auto; display: none; }
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .page-container { padding: 20px; max-width: 600px; margin: 0 auto; display: none; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { color: var(--primary); text-align: center; margin: 15px 0 25px 0; font-size: 24px; font-weight: 800; }
+        /* 進度卡片 */
+        .evolution-card {
+            background: #181818;
+            border: 1px solid #222;
+            border-radius: 35px;
+            padding: 35px 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+        .rank-status { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+        .rank-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 15px; letter-spacing: -0.5px; }
+        .xp-container { height: 8px; background: #000; border-radius: 10px; margin: 25px 0 10px; overflow: hidden; }
+        .xp-fill { 
+            height: 100%; background: var(--grad); width: 0%; 
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 10px var(--primary);
+        }
+        .xp-stats { font-size: 12px; color: var(--text-dim); margin-top: 10px; font-weight: 500; }
 
         .card {
             background: var(--card);
-            padding: 22px;
-            border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.04);
+            padding: 28px;
+            border-radius: 35px;
+            margin-bottom: 25px;
+            border: 1px solid #1f1f1f;
         }
 
-        label { display: block; color: #777; font-size: 11px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
+        h2 { font-size: 22px; font-weight: 800; margin-bottom: 25px; margin-left: 5px; color: #eee; }
+        label { display: block; color: #555; font-size: 10px; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; }
 
         select, input {
-            width: 100%; padding: 15px; margin-bottom: 15px;
-            border-radius: 16px; border: 1px solid transparent;
+            width: 100%; padding: 18px; margin-bottom: 22px;
+            border-radius: 18px; border: 1px solid #252525;
             background: var(--input-bg); color: white; font-size: 16px;
         }
-        select:focus, input:focus { border-color: var(--primary); outline: none; background: #2f2f2f; }
+        select:focus, input:focus { border-color: var(--primary); outline: none; background: #222; }
 
-        .quick-tip-card {
-            background: linear-gradient(160deg, rgba(0, 209, 178, 0.12) 0%, rgba(15, 15, 15, 0.4) 100%);
-            border-radius: 20px; padding: 18px; margin-bottom: 24px; border-left: 6px solid var(--primary);
-        }
-        .tip-title { color: var(--primary); font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
-        .tip-list { margin: 0 0 12px 0; padding-left: 20px; color: #efefef; line-height: 1.7; font-size: 13.5px; }
-        .caution-title { color: var(--danger); font-weight: 800; margin-bottom: 6px; display: block; font-size: 13px; }
-        .caution-list { margin: 0; padding-left: 20px; color: #ffbaba; line-height: 1.5; font-size: 13px; list-style-type: square; }
-
-        .btn-set { width: 100%; padding: 18px; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; cursor: pointer; background: #333; color: white; transition: 0.2s; }
-        .btn-set.primary { background: var(--grad); color: black; box-shadow: 0 8px 15px rgba(0, 209, 178, 0.3); }
-        .btn-set:active { transform: scale(0.96); }
-        .btn-set:disabled { background: #444; color: #888; cursor: not-allowed; }
+        .btn-set { width: 100%; padding: 22px; border: none; border-radius: 22px; font-size: 18px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-set.primary { background: var(--grad); color: #000; box-shadow: 0 10px 25px rgba(0, 209, 178, 0.2); }
+        .btn-set:active { transform: scale(0.97); }
 
         .history-card {
-            background: var(--card); padding: 18px; border-radius: 20px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 5px solid var(--primary); position: relative;
+            background: #1a1a1a; padding: 22px; border-radius: 25px; margin-bottom: 12px;
+            border: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
         }
-        .history-val { color: var(--primary); font-weight: 800; font-size: 19px; margin-right: 35px; }
-        .del-btn { position: absolute; right: 15px; color: #444; font-size: 20px; cursor: pointer; }
+        .history-title { font-weight: 700; font-size: 15px; color: #fff; }
+        .history-data { color: var(--primary); font-weight: 800; font-size: 14px; }
 
-        .btn-sync { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 18px; font-weight: 900; margin-top: 25px; box-shadow: 0 10px 20px rgba(74, 105, 189, 0.4); transition: 0.3s; }
-        .btn-sync:disabled { background: #2c3e50; opacity: 0.6; }
+        .btn-sync { width: 100%; padding: 20px; background: #2c3e50; color: white; border: none; border-radius: 20px; font-weight: 700; margin-top: 15px; }
 
-        .part-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
-        .part-btn { flex: 0 0 auto; padding: 12px 20px; background: #2d2d2d; border-radius: 30px; border: none; color: #888; font-size: 13px; font-weight: bold; }
-        .part-btn.active { background: var(--primary); color: black; }
+        .part-filter { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 25px; scrollbar-width: none; }
+        .part-btn { flex: 0 0 auto; padding: 12px 24px; background: #1a1a1a; border-radius: 35px; border: none; color: #555; font-size: 12px; font-weight: 700; }
+        .part-btn.active { background: #eee; color: #000; }
 
-        .rec-item { background: var(--card); border-radius: 24px; margin-bottom: 25px; border: 1px solid #333; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .rec-head { background: #252525; padding: 18px; border-bottom: 1px solid #333; }
-        .rec-label { color: var(--highlight); font-size: 12px; font-weight: 800; display: block; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 4px; }
-        .rec-list { margin: 0 0 18px 0; padding-left: 20px; color: #ddd; line-height: 1.8; font-size: 14.5px; }
+        #analysis-loader { text-align: center; color: var(--primary); font-weight: bold; padding: 10px; font-size: 11px; display: none; }
     </style>
 </head>
 <body>
 
-    <!-- 驗證系統 -->
+    <!-- 認證介面 -->
     <div id="login-overlay">
         <div class="login-card">
-            <div style="font-size: 50px; margin-bottom: 10px;">⚡</div>
-            <h2 style="margin-top: 0;">重訓授權認證</h2>
-            <p style="color: #666; font-size: 12px; margin-bottom: 20px;">請輸入 4 位數重訓密碼進入系統</p>
-            <input type="password" id="login-pwd" placeholder="輸入密碼..." style="text-align: center; border-radius: 12px;">
-            <button class="btn-set primary" onclick="checkLogin()">登入教練系統</button>
-            <p id="login-err" style="color: var(--danger); font-size: 12px; margin-top: 15px; display: none;">密碼錯誤，請再試一次</p>
+            <div style="font-size: 50px; margin-bottom: 20px;">💪</div>
+            <h3 style="margin: 0; font-weight: 900; letter-spacing: 1px;">重訓進度筆記</h3>
+            <p style="color: #444; font-size: 12px; margin-top: 10px; margin-bottom: 30px;">數據化您的每一分努力</p>
+            <input type="password" id="login-pwd" placeholder="認證密碼" style="text-align: center;">
+            <button class="btn-set primary" onclick="checkLogin()">登入</button>
+            <p id="login-err" style="color: var(--danger); font-size: 12px; margin-top: 15px; display: none;">驗證失敗</p>
         </div>
     </div>
 
-    <!-- 主內容區 -->
+    <!-- 主介面 -->
     <div id="main-content" class="page-container">
         <div class="nav">
-            <div class="nav-item active" onclick="showPage('record', this)">⚡ 紀錄</div>
-            <div class="nav-item" onclick="showPage('analysis', this)">📊 分析</div>
-            <div class="nav-item" onclick="showPage('recommend', this)">🏆 教學</div>
+            <div class="nav-item active" onclick="showPage('record', this)">紀錄</div>
+            <div class="nav-item" onclick="showPage('analysis', this)">分析</div>
+            <div class="nav-item" onclick="showPage('recommend', this)">指南</div>
         </div>
 
+        <!-- 訓練登錄 -->
         <div id="page-record" class="tab-content active">
-            <h2>⚡ 訓練即時紀錄</h2>
+            <h2>⚡ 訓練登錄</h2>
             <div class="card">
-                <label>選擇或新增訓練動作</label>
+                <label>日期</label>
+                <input type="date" id="record-date">
+                
+                <label>動作名稱</label>
                 <select id="exercise" onchange="autoFill();"></select>
 
-                <div id="add-action-box" style="display:none; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 18px; margin-bottom: 20px; border: 1px dashed #444;">
-                    <input type="text" id="new-action-name" placeholder="輸入新動作名稱...">
+                <div id="add-action-box" style="display:none; background: #000; padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #222;">
+                    <input type="text" id="new-action-name" placeholder="新動作名稱...">
                     <select id="new-action-cat">
-                        <option value="Back">🛶 背部精雕</option>
-                        <option value="Chest">🛡️ 胸部訓練</option>
-                        <option value="Shoulders">⚡ 肩膀手臂</option>
-                        <option value="Legs">🦵 下肢王者</option>
+                        <option value="Back">🛶 背部</option>
+                        <option value="Chest">🛡️ 胸部</option>
+                        <option value="Shoulders">⚡ 肩膀</option>
+                        <option value="Legs">🦵 下肢</option>
+                        <option value="Abs">🔥 腹部</option>
                     </select>
-                    <button style="width:100%; background:var(--primary); color:black; font-weight:bold; border:none; padding:12px; border-radius:12px;" onclick="saveNewAction()">確認新增動作</button>
+                    <button class="btn-set primary" style="padding: 12px; font-size:14px;" onclick="saveNewAction()">確認新增</button>
                 </div>
-                <button style="background:none; color:var(--primary); border:none; font-size:12px; margin-bottom:15px; font-weight:bold; cursor:pointer;" onclick="toggleAddBox()">＋ 我要新增動作</button>
+                <button style="background:none; color:var(--primary); border:none; font-size:11px; margin-bottom:20px; font-weight:bold;" onclick="toggleAddBox()">＋ 加入個人自定義動作</button>
 
-                <!-- 即時教學區 -->
-                <div id="quick-tip-box" class="quick-tip-card">
-                    <span class="tip-title">⚡ 教練核心指令</span>
-                    <ul id="quick-points" class="tip-list"></ul>
-                    <span class="caution-title">🛑 嚴重錯誤警告</span>
-                    <ul id="quick-cautions" class="caution-list"></ul>
+                <div style="background: var(--primary-soft); padding: 18px; border-radius: 18px; border-left: 3px solid var(--primary);">
+                    <label style="color: var(--primary); margin-bottom: 8px;">🔥 專業力學要領</label>
+                    <ul id="quick-points" style="margin:0; padding-left:18px; color:#aaa; font-size:13.5px; line-height:1.7;"></ul>
                 </div>
 
-                <div style="display: flex; gap: 12px;">
-                    <div style="flex:1"><label>重量 (kg)</label><input type="number" id="weight" value="0" step="0.5"></div>
-                    <div style="flex:1"><label>次數 (Reps)</label><input type="number" id="reps" value="12"></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 25px;">
+                    <div><label>重量 kg</label><input type="number" id="weight" value="0" step="0.5"></div>
+                    <div><label>次數</label><input type="number" id="reps" value="12"></div>
+                    <div><label>總組數</label><input type="number" id="totalSets" value="4"></div>
                 </div>
 
-                <label>選擇完成組數 (即時儲存)</label>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-set" style="flex:1" onclick="quickAdd(2)">2 組</button>
-                    <button class="btn-set primary" style="flex:1" onclick="quickAdd(3)">3 組</button>
-                    <button class="btn-set" style="flex:1" onclick="quickAdd(4)">4 組</button>
-                </div>
+                <button class="btn-set primary" onclick="addExerciseSession()">紀錄本項總結數據</button>
             </div>
 
-            <div style="display:flex; justify-content:space-between; margin:20px 5px 10px; color:#888; font-size:12px; font-weight:bold;">
-                <span>📍 手機暫存數據</span>
-                <span id="record-count" style="color:var(--primary);">0 筆</span>
-            </div>
             <div id="history-list"></div>
-            <button id="syncBtn" class="btn-sync" onclick="syncToGoogle()">☁️ 同步至雲端試算表</button>
+            <button id="syncBtn" class="btn-sync" onclick="syncToGoogle()">☁️ 同步至雲端</button>
         </div>
 
-        <!-- 數據分析 -->
+        <!-- 進度分析 -->
         <div id="page-analysis" class="tab-content">
-            <h2>📊 訓練數據視覺化</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
-                <div style="background:#222; padding:15px; border-radius:20px; text-align:center;">
-                    <span style="font-size:10px; color:#666;">總訓練體積</span>
-                    <span id="total-vol" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0</span>
+            <h2>📊 專業成長進度</h2>
+            
+            <div class="evolution-card">
+                <div class="rank-status" id="rank-prefix">Progression Status</div>
+                <div class="rank-title" id="user-level">---</div>
+                <div class="xp-container">
+                    <div id="level-progress" class="xp-fill"></div>
                 </div>
-                <div style="background:#222; padding:15px; border-radius:20px; text-align:center;">
-                    <span style="font-size:10px; color:#666;">累積總組數</span>
+                <div class="xp-stats" id="next-level-hint">同步數據中...</div>
+                <div class="xp-stats" id="milestone-compare" style="color: #444; margin-top: 15px;"></div>
+            </div>
+
+            <div id="analysis-loader">⏳ 正在連線雲端資料庫...</div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:25px;">
+                <div style="background:#111; padding:22px; border-radius:30px; text-align:center; border: 1px solid #1a1a1a;">
+                    <span style="font-size:10px; color:#444; display:block; margin-bottom:8px; font-weight:bold;">累積訓練量</span>
+                    <span id="total-vol" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0 kg</span>
+                </div>
+                <div style="background:#111; padding:22px; border-radius:30px; text-align:center; border: 1px solid #1a1a1a;">
+                    <span style="font-size:10px; color:#444; display:block; margin-bottom:8px; font-weight:bold;">歷史總動作項</span>
                     <span id="total-sets" style="display:block; color:var(--primary); font-size:20px; font-weight:900;">0</span>
                 </div>
             </div>
-            <div class="card"><label>部位分佈比例</label><canvas id="muscleChart"></canvas></div>
-            <div class="card"><label>近期訓練量趨勢</label><canvas id="volumeChart"></canvas></div>
+
+            <div class="card">
+                <label>訓練體積進化趨勢 (最近 30 次)</label>
+                <canvas id="volumeChart"></canvas>
+            </div>
+            
+            <div class="card">
+                <label>各肌群平衡發展趨勢</label>
+                <canvas id="muscleTrendChart"></canvas>
+            </div>
+            
+            <button style="width:100%; background:none; border:1px solid #222; color:#333; padding:15px; border-radius:20px; font-size:11px; font-weight:bold;" onclick="fetchAndRenderAnalysis()">🔄 強制同步雲端數據</button>
         </div>
 
-        <!-- 專業教學 -->
+        <!-- 指南 -->
         <div id="page-recommend" class="tab-content">
-            <h2>🏆 教練深度教學指南</h2>
+            <h2>🏆 動作執行參考</h2>
             <div class="part-filter">
-                <button class="part-btn active" onclick="setPart('Back', this)">🛶 背部精雕</button>
-                <button class="part-btn" onclick="setPart('Chest', this)">🛡️ 胸部訓練</button>
-                <button class="part-btn" onclick="setPart('Shoulders', this)">⚡ 肩膀手臂</button>
-                <button class="part-btn" onclick="setPart('Legs', this)">🦵 下肢王者</button>
+                <button class="part-btn active" onclick="setPart('Back', this)">背部</button>
+                <button class="part-btn" onclick="setPart('Chest', this)">胸部</button>
+                <button class="part-btn" onclick="setPart('Shoulders', this)">肩膀</button>
+                <button class="part-btn" onclick="setPart('Legs', this)">下肢</button>
+                <button class="part-btn" onclick="setPart('Abs', this)">腹部</button>
             </div>
             <div id="recommend-view"></div>
         </div>
     </div>
 
     <script>
-        // --- 教練連結網址：請確保這個網址是您的最新部署版本 ---
-        const gasUrl = "https://script.google.com/macros/s/AKfycbw8lb4bTA5G2Oe9e5mRiI2QpKWlWlis_AIqe6rByH-f_vOfk3Oyemw-7Fcy2uXFR-qJPw/exec";
-        
-        const DATA_KEY = 'gym_v11_data';
-        const ACTION_KEY = 'gym_v11_actions';
+        const gasUrl = "https://script.google.com/macros/s/AKfycbxQsm2xWlTrKsqYpjazIlAbFlUSGndtBtZU-3r3xYdLnMYWT4cngY_FbO2kOxYOw3_Apg/exec";
+        const DATA_KEY = 'gym_v27_data';
+        const ACTION_KEY = 'gym_v27_actions';
         const APP_PWD = "8888"; 
 
-        const defaultWeights = { 
-            "腿推 (Leg Press)": 0, "臀推 (Hip Thrust)": 0, "內夾腿 (Adduction)": 25, 
-            "腿外推 (Abduction)": 25, "腿後勾 (Leg Curl)": 25, "腿前勾 (Leg Extension)": 18,
-            "保加利亞蹲": 0
-        };
-
         const coachDictionary = {
-            "胸推": { points: ["握柄精準對齊「乳頭連線(胸中線)」","肩胛骨後收並向下拉緊穩定","手肘與軀幹保持約 45-60 度角","發力時呼氣，頂端不鎖死關節"], cautions: ["手肘絕對不可高過肩膀","嚴禁利用挺腰慣性代償"] },
-            "滑輪下拉": { points: ["建議握距為 1.5 倍肩寬","啟動時肩膀先下沉並稍微「向外旋轉」","手肘朝側腹口袋方向下拉至上胸","緩慢回放感受背肌徹底拉長"], cautions: ["嚴禁聳肩借力","嚴禁利用身體後倒慣性擺盪"] },
-            "腿外推": { points: ["身體可微前傾增加臀中肌感受","發力將兩腿向外推開，頂端稍停","回放時緩慢維持張力"], cautions: ["不要利用腰部擺盪借力"] },
-            "保加利亞蹲": { points: ["重心在前腳足中，後腳勾住長凳","垂直下蹲至前大腿與地面平行","軀幹微前傾增加臀部參與度"], cautions: ["前膝穩定不要內扣晃動","重心不要全壓在後腳腳趾上"] },
-            "划船": { points: ["背部保持平直","手肘貼緊軀幹後拉過腰際","夾緊肩胛骨停留瞬間 1 秒"], cautions: ["嚴禁圓背拉大重量"] },
-            "飛鳥": { points: ["雙臂呈圓弧狀","中間強力擠壓胸肌邊緣","緩慢打開感受深度延展"], cautions: ["手肘角度固定不可變"] },
-            "腿推": { points: ["腳掌踩滿踏板中心","下放膝蓋至 90 度，背臀必須貼死墊子","推起至頂端膝蓋微彎，嚴禁鎖死"], cautions: ["屁股離開座墊會嚴重傷及腰椎"] },
-            "臀推": { points: ["槓置於髖部，腳跟踩實發力","頂端強力擠壓臀部 1 秒，下巴微收","視線看正前方保護頸椎"], cautions: ["嚴禁墊腳尖發力","嚴禁過度拱腰"] },
-            "肩上推": { points: ["背部緊靠，垂直推向天頂","下放至手肘略低於肩膀即可","核心收緊不拱背"], cautions: ["嚴禁挺起胸口變成斜推"] },
-            "側平舉": { points: ["手肘微彎抬至肩高","想像手提水壺倒水，小指微朝上","肩膀下沉，放鬆斜方肌"], cautions: ["嚴禁聳肩借力提重量"] }
+            "胸推": { points: ["對齊乳頭連線，肩胛後收下壓並貼死靠墊","手肘與軀幹呈 45-60 度角，嚴禁手肘與肩平行","推起時呼氣，頂端肘關節微彎不鎖死"] },
+            "飛鳥": { points: ["下往上針對上胸；平行針對中縫。肘關節固定微彎","想像抱大樹姿態，在中間感受胸肌強力擠壓","離心下放緩慢受控，感受胸肌深度延展"] },
+            "滑輪下拉": { points: ["肩膀先「下沉並外旋」(挺胸感)，手僅是勾子","手肘朝側腹口袋方向下拉至上胸，夾緊背肌","回放時保持張力，感受背闊肌徹底被拉長"] },
+            "划船": { points: ["背部平直不圓背。手肘貼近軀幹向後方拉","肩胛骨先收縮再拉重量，頂端停留一秒","控制離心回放，不要讓重量重摔"] },
+            "硬舉": { points: ["槓鈴路徑貼近小腿。用「推地板」的感覺啟動","核心絕對鎖死保護腰椎，頂端臀部夾緊","下放時髖部先動(Hip Hinge)，保持背部平直"] },
+            "保加利亞蹲": { points: ["重心放在前腳足中。軀幹微前傾增加臀部參與度","前膝穩定不內扣，垂直下蹲至大腿與地平行","後腳僅提供穩定，不參與發力"] },
+            "腿推": { points: ["腳掌踩滿踏板中心。背與臀部全程貼死座墊","膝蓋不超過腳尖過多。頂端膝蓋微彎嚴禁鎖死"] },
+            "棒式": { points: ["手肘位於肩膀正下方。收緊核心、夾緊臀部","身體從頭到腳成一直線，脖子放鬆看地面"] },
+            "阿諾推舉": { points: ["底部手心朝內。推起時旋轉手腕至手心朝外","全程控制速度，保護肩關節與旋轉肌群穩定"] }
         };
 
         const genericRules = {
-            "Back": { points: ["啟動前先下沉肩胛骨","手僅是勾子，用肘發力","徹底拉長背肌"], cautions: ["嚴禁聳肩代償"] },
-            "Chest": { points: ["肩胛穩定後收","手肘微收不平張","關節不鎖死"], cautions: ["不要鎖死肘關節"] },
-            "Legs": { points: ["腳跟或足中踩實","核心收緊保護腰椎","頂端膝蓋保持微彎"], cautions: ["膝蓋嚴禁打直鎖死"] },
-            "Shoulders": { points: ["核心支撐腰部","動作緩慢受控","肩膀下沉啟動"], cautions: ["脖子與斜方肌放鬆"] }
+            "Back": { points: ["先下沉肩胛骨啟動","手肘引導路徑","徹底延展背肌"] },
+            "Chest": { points: ["肩胛骨穩定貼靠","手肘微收勿平張","控制離心收縮"] },
+            "Legs": { points: ["重心踩穩足中","核心緊繃保護腰椎","膝蓋不打直鎖死"] },
+            "Shoulders": { points: ["肩膀下沉勿聳肩","動作緩慢受控","不利用身體擺盪"] },
+            "Abs": { points: ["意識專注腹部收縮","下背部緊貼墊子","節奏緩慢、不借力"] }
         };
 
+        const levelTitles = ["修行初心", "鍛鍊學徒", "入門行者", "重訓愛好", "進階鍛鍊", "鋼鐵意志", "肌肉常客", "區域精英", "專業行者", "資深玩家", "力量專家", "重量導師", "大師境界", "巔峰大師", "鋼鐵宗師", "傳奇人物", "半神境界", "超凡入聖", "力量化身", "極致泰坦"];
+
         let currentPart = 'Back';
-        let muscleChart = null; let volumeChart = null;
+        let muscleTrendChart = null; let volumeChart = null;
+        let cloudData = []; 
 
         const defaultActions = [
-            {n:"腿推 (Leg Press)", c:"Legs"}, {n:"臀推 (Hip Thrust)", c:"Legs"}, {n:"內夾腿 (Adduction)", c:"Legs"}, {n:"腿外推 (Abduction)", c:"Legs"}, {n:"腿後勾 (Leg Curl)", c:"Legs"}, {n:"腿前勾 (Leg Extension)", c:"Legs"}, {n:"保加利亞蹲", c:"Legs"},
-            {n:"滑輪下拉 (Lat Pulldown)", c:"Back"}, {n:"坐式划船 (Seated Row)", c:"Back"}, {n:"W桿對握下拉", c:"Back"}, {n:"反向飛鳥 (Reverse Fly)", c:"Back"},
-            {n:"胸推 (Chest Press)", c:"Chest"}, {n:"夾胸飛鳥 (Pec Fly)", c:"Chest"}, {n:"啞鈴臥推", c:"Chest"},
-            {n:"肩上推 (Shoulder Press)", c:"Shoulders"}, {n:"側平舉 (Lateral Raise)", c:"Shoulders"}, {n:"阿諾推舉", c:"Shoulders"}
+            {n:"硬舉 (Deadlift)", c:"Legs"}, {n:"保加利亞蹲", c:"Legs"}, {n:"腿推 (Leg Press)", c:"Legs"}, {n:"腿前勾 (Extension)", c:"Legs"}, {n:"腿後勾 (Curl)", c:"Legs"}, {n:"臀推 (Hip Thrust)", c:"Legs"},
+            {n:"滑輪下拉 (Lat Pulldown)", c:"Back"}, {n:"Cable 划船 (Cable Row)", c:"Back"}, {n:"坐式划船", c:"Back"}, {n:"反向飛鳥", c:"Back"},
+            {n:"胸推 (Chest Press)", c:"Chest"}, {n:"Cable 飛鳥 (下往上)", c:"Chest"}, {n:"Cable 飛鳥 (平行)", c:"Chest"}, {n:"夾胸飛鳥", c:"Chest"},
+            {n:"肩上推 (Shoulder Press)", c:"Shoulders"}, {n:"側平舉 (Lateral Raise)", c:"Shoulders"}, {n:"阿諾推舉", c:"Shoulders"},
+            {n:"捲腹 (Crunch)", c:"Abs"}, {n:"棒式 (Plank)", c:"Abs"}, {n:"Cable 木砍 (Woodchop)", c:"Abs"}, {n:"仰臥舉腿", c:"Abs"}
         ];
 
         function checkLogin() {
             if(document.getElementById('login-pwd').value === APP_PWD) {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
+                document.getElementById('record-date').value = new Date().toISOString().split('T')[0];
                 initSelect();
-            } else {
-                document.getElementById('login-err').style.display = 'block';
-            }
+            } else { document.getElementById('login-err').style.display = 'block'; }
         }
 
         function initSelect() {
             const custom = JSON.parse(localStorage.getItem(ACTION_KEY)) || [];
             const all = [...defaultActions, ...custom];
-            const groups = { Legs:"🦵 下肢王者", Back:"🛶 背部精雕", Chest:"🛡️ 胸部訓練", Shoulders:"⚡ 肩膀手臂" };
+            const groups = { Legs:"🦵 下肢", Back:"🛶 背部", Chest:"🛡️ 胸部", Shoulders:"⚡ 肩膀", Abs:"🔥 腹部" };
             let html = "";
             for(let key in groups) {
                 html += `<optgroup label="${groups[key]}">`;
@@ -302,7 +319,7 @@
             custom.push({n: name, c: cat});
             localStorage.setItem(ACTION_KEY, JSON.stringify(custom));
             document.getElementById('new-action-name').value = "";
-            toggleAddBox(); initSelect(); alert("✅ 新動作已加入！");
+            toggleAddBox(); initSelect();
         }
 
         function autoFill() {
@@ -311,34 +328,24 @@
             const cat = ex.value;
             const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
             const last = data.find(i => i.name === name);
-            document.getElementById('weight').value = last ? last.wt : (defaultWeights[name] || 0);
+            document.getElementById('weight').value = last ? last.wt : 20;
             document.getElementById('reps').value = last ? last.rp : 12;
-            const matched = getGuide(name, cat);
-            document.getElementById('quick-points').innerHTML = matched.points.map(p => `<li>${p}</li>`).join('');
-            document.getElementById('quick-cautions').innerHTML = matched.cautions.map(c => `<li>${c}</li>`).join('');
+            const matched = coachDictionary[Object.keys(coachDictionary).find(k => name.includes(k))] || genericRules[cat];
+            document.getElementById('quick-points').innerHTML = (matched.points || []).map(p => `<li>${p}</li>`).join('');
         }
 
-        function getGuide(name, cat) {
-            for(let key in coachDictionary) { if(name.includes(key)) return coachDictionary[key]; }
-            return genericRules[cat] || { points: ["維持核心穩定"], cautions: ["注意安全"] };
-        }
-
-        function quickAdd(sets) {
+        function addExerciseSession() {
+            const dateVal = document.getElementById('record-date').value;
             const ex = document.getElementById('exercise');
             const name = ex.options[ex.selectedIndex].text;
             const type = ex.value;
-            const wt = parseFloat(document.getElementById('weight').value);
-            const rp = parseInt(document.getElementById('reps').value);
+            const wt = parseFloat(document.getElementById('weight').value) || 0;
+            const rp = parseInt(document.getElementById('reps').value) || 0;
+            const ts = parseInt(document.getElementById('totalSets').value) || 0;
+            if(!ts || ts < 1) return alert("請輸入總組數");
             let data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
-            const now = new Date();
-            for(let i=1; i<=sets; i++) {
-                data.unshift({ 
-                    id: Date.now()+i, name, type, wt, rp, 
-                    date: `${now.getMonth()+1}/${now.getDate()}`, 
-                    time: now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}), 
-                    setIdx: i 
-                });
-            }
+            const dParts = dateVal.split('-');
+            data.unshift({ id: Date.now(), name, type, wt, rp, totalSets: ts, date: `${dParts[1]}/${dParts[2]}`, rawDate: dateVal });
             localStorage.setItem(DATA_KEY, JSON.stringify(data));
             renderHistory();
             if (navigator.vibrate) navigator.vibrate(50);
@@ -346,13 +353,15 @@
 
         function renderHistory() {
             const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
-            document.getElementById('record-count').innerText = `${data.length} 筆`;
             document.getElementById('history-list').innerHTML = data.map(i => `
                 <div class="history-card">
-                    <div><b>${i.name} (組${i.setIdx})</b><span>${i.date} ${i.time}</span></div>
-                    <div class="history-val">${i.wt}kg x ${i.rp}</div>
-                    <div class="del-btn" onclick="deleteItem(${i.id})">✕</div>
-                </div>`).join('') || '<p style="text-align:center;color:#444;">尚未有訓練數據</p>';
+                    <div class="history-main-info">
+                        <div class="history-subtitle" style="font-size:10px; color:#444;">${i.date} | ${i.type}</div>
+                        <div class="history-title">${i.name}</div>
+                        <div class="history-data">${i.wt}kg x ${i.rp}下 x ${i.totalSets}組</div>
+                    </div>
+                    <div onclick="deleteItem(${i.id})" style="color:#222; padding:10px; cursor:pointer;">✕</div>
+                </div>`).join('') || '<p style="text-align:center;color:#222;font-size:11px;margin-top:20px;">等待新數據...</p>';
         }
 
         function deleteItem(id) {
@@ -366,7 +375,7 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('page-' + pId).classList.add('active');
             navEl.classList.add('active');
-            if (pId === 'analysis') renderAnalysis();
+            if (pId === 'analysis') { renderAnalysis(); fetchAndRenderAnalysis(); }
             if (pId === 'recommend') renderRecommend();
             window.scrollTo(0, 0);
         }
@@ -377,67 +386,100 @@
             const custom = JSON.parse(localStorage.getItem(ACTION_KEY)) || [];
             const all = [...defaultActions, ...custom].filter(a => a.c === currentPart);
             document.getElementById('recommend-view').innerHTML = all.map(i => {
-                const guide = getGuide(i.n, i.c);
-                return `<div class="rec-item">
-                    <div class="rec-head"><b class="rec-title">${i.n}</b></div>
-                    <div class="rec-body">
-                        <span class="rec-label">⚡ 教練核心指令</span><ul class="rec-list">${guide.points.map(p => `<li>${p}</li>`).join('')}</ul>
-                        <span class="rec-label" style="color:var(--danger)">🛑 嚴重警告錯誤</span><ul class="rec-list" style="color:#ffbaba;">${guide.cautions.map(c => `<li>${c}</li>`).join('')}</ul>
-                    </div>
-                </div>`;
+                const guide = coachDictionary[Object.keys(coachDictionary).find(k => i.n.includes(k))] || genericRules[i.c];
+                return `<div class="rec-item"><div class="rec-head"><b class="rec-title">${i.n}</b></div><div class="rec-body" style="padding:15px;"><span class="rec-label" style="color:var(--primary); font-size:10px;">技術要領紀錄</span><ul class="rec-list" style="margin-top:5px; padding-left:15px; color:#999; font-size:13px; line-height:1.6;">${guide.points.map(p => `<li>${p}</li>`).join('')}</ul></div></div>`;
             }).join('');
         }
 
+        async function fetchAndRenderAnalysis() {
+            document.getElementById('analysis-loader').style.display = 'block';
+            try {
+                const resp = await fetch(gasUrl + "?t=" + Date.now());
+                const result = await resp.json();
+                if(Array.isArray(result)) cloudData = result;
+            } catch (e) { console.log("FETCH_FAILED"); }
+            document.getElementById('analysis-loader').style.display = 'none';
+            renderAnalysis();
+        }
+
         function renderAnalysis() {
-            const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
-            if(!data.length) return;
-            document.getElementById('total-vol').innerText = data.reduce((s,i)=>s+(i.wt*i.rp),0).toLocaleString() + " kg";
-            document.getElementById('total-sets').innerText = data.length + " 組";
-            const mus = { Back:0, Chest:0, Legs:0, Shoulders:0 };
-            data.forEach(i => { if(mus[i.type] !== undefined) mus[i.type]++; });
-            if(muscleChart) muscleChart.destroy();
-            muscleChart = new Chart(document.getElementById('muscleChart'), { type:'doughnut', data:{ labels:['背部','胸部','下肢','肩膀'], datasets:[{ data:Object.values(mus), backgroundColor:['#00d1b2','#4a69bd','#ffdd57','#ff4757'], borderWidth:0 }] }, options:{ plugins:{ legend:{ position:'bottom', labels:{color:'#fff'} } } } });
-            const dai = {}; data.slice().reverse().forEach(i => dai[i.date] = (dai[i.date]||0)+(i.wt*i.rp));
+            const localData = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
+            const allData = [...cloudData, ...localData];
+            if(!allData.length) return;
+
+            const totalVol = allData.reduce((s,i) => s + (parseFloat(i.wt||0) * parseInt(i.rp||0) * parseInt(i.totalSets||1)), 0);
+            document.getElementById('total-vol').innerText = Math.round(totalVol).toLocaleString() + " kg";
+            document.getElementById('total-sets').innerText = allData.length;
+
+            const baseStep = 4000;
+            let level = 1; let currentLevelVol = 0; let nextLevelVol = 0;
+
+            if (totalVol <= 40000) {
+                level = Math.floor(totalVol / baseStep) + 1;
+                currentLevelVol = (level - 1) * baseStep;
+                nextLevelVol = level * baseStep;
+                document.getElementById('rank-prefix').innerText = "Foundational Stage";
+            } else {
+                level = Math.floor(11 + Math.pow((totalVol - 40000) / 4000, 1/1.6));
+                currentLevelVol = 40000 + Math.pow(level - 11, 1.6) * 4000;
+                nextLevelVol = 40000 + Math.pow(level + 1 - 11, 1.6) * 4000;
+                document.getElementById('rank-prefix').innerText = "Professional Evolution";
+            }
+
+            const rankIndex = Math.min(Math.floor((level - 1) / 5), levelTitles.length - 1);
+            document.getElementById('user-level').innerText = `Lv.${level} ${levelTitles[rankIndex]}`;
+            
+            const progress = ((totalVol - currentLevelVol) / (nextLevelVol - currentLevelVol)) * 100;
+            document.getElementById('level-progress').style.width = Math.min(progress, 100) + "%";
+            document.getElementById('next-level-hint').innerText = `進度 ${progress.toFixed(1)}% | 距離下一階需 ${(nextLevelVol - totalVol).toLocaleString(undefined, {maximumFractionDigits:0})} kg`;
+
+            const compareText = totalVol < 100000 ? `${(totalVol / 400).toFixed(1)} 台重機` : totalVol < 2000000 ? `${(totalVol / 5000).toFixed(1)} 隻非洲大象` : `${(totalVol / 220000).toFixed(2)} 台波音 747`;
+            document.getElementById('milestone-compare').innerText = `生涯總重已超越 ${compareText}`;
+
+            const dailyTotal = {}; const dailyMuscle = {};
+            allData.forEach(i => {
+                const d = i.date; const v = (parseFloat(i.wt||0) * parseInt(i.rp||0) * parseInt(i.totalSets||1));
+                dailyTotal[d] = (dailyTotal[d]||0) + v;
+                if(!dailyMuscle[d]) dailyMuscle[d] = { Back:0, Chest:0, Legs:0, Shoulders:0, Abs:0 };
+                dailyMuscle[d][i.type] = (dailyMuscle[d][i.type]||0) + v;
+            });
+            const sortedDates = Object.keys(dailyTotal).sort((a,b) => {
+                const [mA, dA] = a.split('/').map(Number); const [mB, dB] = b.split('/').map(Number);
+                return (mA * 100 + dA) - (mB * 100 + dB);
+            }).slice(-30);
+
             if(volumeChart) volumeChart.destroy();
-            volumeChart = new Chart(document.getElementById('volumeChart'), { type:'bar', data:{ labels:Object.keys(dai), datasets:[{ label:'量(kg)', data:Object.values(dai), backgroundColor:'rgba(0, 209, 178, 0.6)', borderRadius:8 }] }, options:{ scales:{ y:{ grid:{color:'#333'}, ticks:{color:'#888'} }, x:{ ticks:{color:'#888'} } }, plugins:{ legend:{display:false} } } });
+            const volCtx = document.getElementById('volumeChart').getContext('2d');
+            volumeChart = new Chart(volCtx, {
+                type:'line',
+                data:{ labels:sortedDates, datasets:[{ label:'Vol', data: sortedDates.map(d => Math.round(dailyTotal[d])), borderColor: '#00d1b2', backgroundColor: 'rgba(0,209,178,0.1)', fill: true, tension: 0.3, borderWidth: 3, pointRadius: 2 }] },
+                options:{ responsive: true, scales:{ y:{ grid:{color:'#1a1a1a'}, ticks:{display:false} }, x:{ grid:{display:false}, ticks:{color:'#444', font:{size:9}} } }, plugins:{ legend:{display:false} } }
+            });
+
+            if(muscleTrendChart) muscleTrendChart.destroy();
+            const mCols = { Back:'#00d1b2', Chest:'#4a69bd', Legs:'#ffdd57', Shoulders:'#ff4757', Abs:'#9b59b6' };
+            muscleTrendChart = new Chart(document.getElementById('muscleTrendChart').getContext('2d'), {
+                type:'line',
+                data: { labels: sortedDates, datasets: Object.keys(mCols).map(k => ({
+                    label: k, data: sortedDates.map(d => Math.round(dailyMuscle[d]?.[k] || 0)), borderColor: mCols[k], borderWidth: 1.5, tension: 0.3, pointRadius: 0, fill: false
+                })) },
+                options:{ responsive: true, scales:{ y:{ grid:{color:'#1a1a1a'}, ticks:{display:false} }, x:{ grid:{display:false}, ticks:{color:'#444', font:{size:8}} } }, plugins:{ legend:{ position:'bottom', labels:{color:'#555', boxWidth:6, font:{size:9}} } } }
+            });
         }
 
         async function syncToGoogle() {
             const data = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
-            if (!data.length) return alert("無暫存資料需要同步！");
-            
-            const btn = document.getElementById('syncBtn');
-            btn.innerText = "⏳ 同步中...";
-            btn.disabled = true;
-
-            const payload = { data: data };
-
+            if (!data.length) return alert("無數據待同步");
+            const btn = document.getElementById('syncBtn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
             try {
-                // 採用最穩定的傳輸方式
-                await fetch(gasUrl, {
-                    method: "POST",
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                
-                alert("🎉 同步指令已發送！\n請過 5 秒後檢查試算表是否出現新資料。");
-                
-                // 發送成功後，僅保留最後 5 筆在手機端以維持圖表運作
-                if (data.length > 5) {
-                    localStorage.setItem(DATA_KEY, JSON.stringify(data.slice(0, 5)));
-                }
-                renderHistory();
-                
-            } catch (e) { 
-                alert("❌ 同步連線失敗：\n" + e.message + "\n請確認您的網路狀況或 GAS 網址。"); 
-            } finally { 
-                btn.innerText = "☁️ 同步至雲端試算表"; 
-                btn.disabled = false; // 確保按鈕一定會重新啟用
-            }
+                await fetch(gasUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ data: data }) });
+                alert("🎉 同步成功！雲端歷史已更新。");
+                localStorage.setItem(DATA_KEY, JSON.stringify(data.slice(0, 1)));
+                renderHistory(); fetchAndRenderAnalysis();
+            } catch (e) { alert("同步失敗，請檢查連線"); } finally { btn.innerText = "☁️ 同步至雲端大腦"; btn.disabled = false; }
         }
 
-        window.onload = renderHistory;
+        window.onload = () => { renderHistory(); fetchAndRenderAnalysis(); };
     </script>
 </body>
 </html>
